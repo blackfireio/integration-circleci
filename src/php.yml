@@ -1,0 +1,78 @@
+version: 2.1
+description: |
+    Installs Blackfire PHP probe.
+    Source: https://github.com/blackfireio/integration-circleci
+
+display:
+    home_url: https://github.com/blackfireio/integration-circleci
+
+orbs:
+    blackfire-agent: blackfireio/agent@dev:0.1
+
+commands:
+    setup:
+        parameters:
+            server_id:
+                type: env_var_name
+                default: BLACKFIRE_SERVER_ID
+            server_token:
+                type: env_var_name
+                default: BLACKFIRE_SERVER_TOKEN
+            client_id:
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_ID
+            client_token:
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_TOKEN
+        steps:
+            - blackfire-agent/setup:
+                  server_id: ${<< parameters.server_id >>}
+                  server_token: ${<< parameters.server_token >>}
+                  client_id: ${<< parameters.client_id >>}
+                  client_token: ${<< parameters.client_token >>}
+            - disable-xdebug
+            - install-player
+            - run:
+                  name: Install PHP probe
+                  command: |
+                      sudo apt-get install blackfire-php
+                      php -v
+
+    disable-xdebug:
+        steps:
+            - run:
+                  name: Disable XDebug
+                  command: |
+                      sudo sed -i -e "s/zend_extension=/;zend_extension=/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+    install-player:
+        steps:
+            - run:
+                  name: Install Blackfire Player
+                  command: |
+                      curl -OLsS https://get.blackfire.io/blackfire-player.phar
+                      chmod +x blackfire-player.phar
+                      sudo mv blackfire-player.phar /usr/local/bin/blackfire-player
+
+examples:
+    blackfire-setup:
+        description: Setup Blackfire for PHP
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire: blackfireio/php@x.y
+
+            jobs:
+                blackfire-example:
+                    docker:
+                        - image: circleci/php:7.3-node
+
+                    steps:
+                        - checkout
+                        - blackfire/setup:
+                              # BLACKFIRE_* are environment variables exposed from your CircleCI project.
+                              server_id: BLACKFIRE_SERVER_ID
+                              server_token: BLACKFIRE_SERVER_TOKEN
+                              client_id: BLACKFIRE_CLIENT_ID
+                              client_token: BLACKFIRE_CLIENT_TOKEN
