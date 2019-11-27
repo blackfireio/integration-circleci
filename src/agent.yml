@@ -1,0 +1,102 @@
+version: 2.1
+description: |
+    Installs and configure Blackfire agent and CLI.
+    Source: https://github.com/blackfireio/integration-circleci
+
+display:
+    home_url: https://github.com/blackfireio/integration-circleci
+
+commands:
+    register:
+        parameters:
+            server_id:
+                type: string
+            server_token:
+                type: string
+            client_id:
+                type: string
+            client_token:
+                type: string
+        steps:
+            - run:
+                  name: Register Blackfire agent and client
+                  command: |
+                      sudo blackfire-agent -register \
+                          --server-id=<< parameters.server_id >> \
+                          --server-token=<< parameters.server_token >>
+                      sudo /etc/init.d/blackfire-agent restart
+                      blackfire config \
+                          --client-id=<< parameters.client_id >> \
+                          --client-token=<< parameters.client_token >>
+
+    setup:
+        parameters:
+            server_id:
+                type: string
+            server_token:
+                type: string
+            client_id:
+                type: string
+            client_token:
+                type: string
+
+        steps:
+            - run:
+                  name: Install Debian package
+                  command: |
+                      wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
+                      echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+                      sudo apt update
+                      sudo apt-get install blackfire-agent
+
+            - register:
+                  server_id: << parameters.server_id >>
+                  server_token: << parameters.server_token >>
+                  client_id: << parameters.client_id >>
+                  client_token: << parameters.client_token >>
+
+    setup-redhat:
+        parameters:
+            server_id:
+                type: string
+            server_token:
+                type: string
+            client_id:
+                type: string
+            client_token:
+                type: string
+
+        steps:
+            - run:
+                  name: Install RedHat package
+                  command: |
+                      sudo yum install pygpgme
+                      wget -O - "http://packages.blackfire.io/fedora/blackfire.repo" | sudo tee /etc/yum.repos.d/blackfire.repo
+                      sudo yum install blackfire-agent
+
+            - register:
+                  server_id: << parameters.server_id >>
+                  server_token: << parameters.server_token >>
+                  client_id: << parameters.client_id >>
+                  client_token: << parameters.client_token >>
+
+examples:
+    install_agent:
+        description: Easily install and configure the Blackfire agent
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire-agent: blackfireio/agent@x.y
+
+            jobs:
+                blackfire-agent-example:
+                    docker:
+                        - image: circleci/php:7.3-node
+                    steps:
+                        - checkout
+                        - blackfire-agent/setup:
+                              server_id: your_server_id
+                              server_token: your_server_token
+                              client_id: your_client_id
+                              client_token: your_client_token
