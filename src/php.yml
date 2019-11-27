@@ -11,17 +11,27 @@ orbs:
 
 commands:
     setup:
+        description: |
+            Installs and configures Blackfire for PHP.
+            This includes the probe, the agent, the CLI and the player.
+
+            Note that this will also disable XDebug as it can conflict with Blackfire probe.
+
         parameters:
             server_id:
+                description: Environment variable name in which your server ID is stored.
                 type: env_var_name
                 default: BLACKFIRE_SERVER_ID
             server_token:
+                description: Environment variable name in which your server token is stored.
                 type: env_var_name
                 default: BLACKFIRE_SERVER_TOKEN
             client_id:
+                description: Environment variable name in which your client ID is stored.
                 type: env_var_name
                 default: BLACKFIRE_CLIENT_ID
             client_token:
+                description: Environment variable name in which your client token is stored.
                 type: env_var_name
                 default: BLACKFIRE_CLIENT_TOKEN
         steps:
@@ -33,7 +43,7 @@ commands:
             - disable-xdebug
             - install-player
             - run:
-                  name: Install PHP probe
+                  name: 'Blackfire: Install PHP probe'
                   command: |
                       sudo apt-get install blackfire-php
                       php -v
@@ -41,14 +51,14 @@ commands:
     disable-xdebug:
         steps:
             - run:
-                  name: Disable XDebug
+                  name: 'Blackfire: Disable XDebug'
                   command: |
                       sudo sed -i -e "s/zend_extension=/;zend_extension=/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
     install-player:
         steps:
             - run:
-                  name: Install Blackfire Player
+                  name: 'Blackfire: Install Player'
                   command: |
                       curl -OLsS https://get.blackfire.io/blackfire-player.phar
                       chmod +x blackfire-player.phar

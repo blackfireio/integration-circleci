@@ -19,7 +19,7 @@ commands:
                 type: string
         steps:
             - run:
-                  name: Register Blackfire agent and client
+                  name: 'Blackfire: Register agent and client'
                   command: |
                       sudo blackfire-agent -register \
                           --server-id=<< parameters.server_id >> \
@@ -42,7 +42,7 @@ commands:
 
         steps:
             - run:
-                  name: Install Debian package
+                  name: 'Blackfire: Install Debian package'
                   command: |
                       wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
                       echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
@@ -68,7 +68,7 @@ commands:
 
         steps:
             - run:
-                  name: Install RedHat package
+                  name: 'Blackfire: Install RedHat package'
                   command: |
                       sudo yum install pygpgme
                       wget -O - "http://packages.blackfire.io/fedora/blackfire.repo" | sudo tee /etc/yum.repos.d/blackfire.repo
