@@ -41,23 +41,20 @@ commands:
                 default: BLACKFIRE_CLIENT_TOKEN
         steps:
             - run:
+                  name: 'Blackfire: Sanity checks'
                   command: |
-                      if [ -z "${<< parameters.server_id >>}" ]; then
-                          echo "Error: << parameters.server_id >> is empty. Please ensure the environment variable << parameters.server_id >> has been added."
-                          exit 1
-                      fi
-                      if [ -z "${<< parameters.server_token >>}" ]; then
-                          echo "Error: << parameters.server_token >> is empty. Please ensure the environment variable << parameters.server_token >> has been added."
-                          exit 1
-                      fi
-                      if [ -z "${<< parameters.client_id >>}" ]; then
-                          echo "Error: << parameters.client_id >> is empty. Please ensure the environment variable << parameters.client_id >> has been added."
-                          exit 1
-                      fi
-                      if [ -z "${<< parameters.client_token >>}" ]; then
-                          echo "Error: << parameters.client_token >> is empty. Please ensure the environment variable << parameters.client_token >> has been added."
-                          exit 1
-                      fi
+                      function test_env_var {
+                          if [ -z "$(printenv $1)" ]; then
+                              echo "Error: ${1} is empty. Please ensure the environment variable ${1} has been added."
+                              exit 1
+                          fi
+                      }
+
+                      test_env_var << parameters.server_id >>
+                      test_env_var << parameters.server_token >>
+                      test_env_var << parameters.client_id >>
+                      test_env_var << parameters.client_token >>
+
             - blackfire-agent/setup:
                   server_id: ${<< parameters.server_id >>}
                   server_token: ${<< parameters.server_token >>}
