@@ -63,6 +63,7 @@ commands:
                       curl -OLsS https://get.blackfire.io/blackfire-player.phar
                       chmod +x blackfire-player.phar
                       sudo mv blackfire-player.phar /usr/local/bin/blackfire-player
+                      blackfire-player --version
 
 examples:
     blackfire-setup:

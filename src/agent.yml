@@ -48,6 +48,9 @@ commands:
                       echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
                       sudo apt update
                       sudo apt-get install blackfire-agent
+                      echo "\n"
+                      blackfire-agent -v
+                      blackfire version
 
             - register:
                   server_id: << parameters.server_id >>
@@ -73,6 +76,9 @@ commands:
                       sudo yum install pygpgme
                       wget -O - "http://packages.blackfire.io/fedora/blackfire.repo" | sudo tee /etc/yum.repos.d/blackfire.repo
                       sudo yum install blackfire-agent
+                      echo "\n"
+                      blackfire-agent -v
+                      blackfire version
 
             - register:
                   server_id: << parameters.server_id >>
