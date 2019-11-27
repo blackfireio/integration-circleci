@@ -48,7 +48,7 @@ commands:
                       echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
                       sudo apt update
                       sudo apt-get install blackfire-agent
-                      echo "\n"
+                      echo ""
                       blackfire-agent -v
                       blackfire version
 
