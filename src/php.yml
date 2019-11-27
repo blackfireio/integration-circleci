@@ -17,6 +17,11 @@ commands:
 
             Note that this will also disable XDebug as it can conflict with Blackfire probe.
 
+            You won't have to consider the parameters if you already have defined the following environment variables
+            in your CirceCI project: BLACKFIRE_SERVER_ID, BLACKFIRE_SERVER_TOKEN, BLACKFIRE_CLIENT_ID, BLACKFIRE_CLIENT_TOKEN.
+
+            If you have set them with different names, you must pass them explicitly as parameters.
+
         parameters:
             server_id:
                 description: Environment variable name in which your server ID is stored.
@@ -66,8 +71,16 @@ commands:
                       blackfire-player --version
 
 examples:
-    blackfire-setup:
-        description: Setup Blackfire for PHP
+    blackfire_php_default_env_vars:
+        description: |
+            Easily install and configure Blackfire for PHP.
+
+            You must setup the following environment variables in your CircleCI project:
+                - BLACKFIRE_SERVER_ID - You Blackfire server ID
+                - BLACKFIRE_SERVER_TOKEN - You Blackfire server token
+                - BLACKFIRE_CLIENT_ID - You Blackfire client ID
+                - BLACKFIRE_CLIENT_TOKEN - You Blackfire client token
+
         usage:
             version: 2.1
 
@@ -81,9 +94,32 @@ examples:
 
                     steps:
                         - checkout
+                        - blackfire/setup
+
+    blackfire_php_custom_env_vars:
+        description: |
+            Easily install and configure Blackfire for PHP.
+
+            You must setup the following environment variables in your CircleCI project:
+                - MY_BF_SERVER_ID - You Blackfire server ID
+                - MY_BF_SERVER_TOKEN - You Blackfire server token
+                - MY_BF_CLIENT_ID - You Blackfire client ID
+                - MY_BF_CLIENT_TOKEN - You Blackfire client token
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire: blackfireio/php@x.y
+
+            jobs:
+                blackfire-example:
+                    docker:
+                        -   image: circleci/php:7.3-node
+
+                    steps:
+                        - checkout
                         - blackfire/setup:
-                              # BLACKFIRE_* are environment variables exposed from your CircleCI project.
-                              server_id: BLACKFIRE_SERVER_ID
-                              server_token: BLACKFIRE_SERVER_TOKEN
-                              client_id: BLACKFIRE_CLIENT_ID
-                              client_token: BLACKFIRE_CLIENT_TOKEN
+                              server_id: MY_BF_SERVER_ID
+                              server_token: MY_BF_SERVER_TOKEN
+                              client_id: MY_BF_CLIENT_ID
+                              client_token: MY_BF_CLIENT_TOKEN
