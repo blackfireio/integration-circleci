@@ -62,6 +62,7 @@ commands:
                       php -v
 
     disable-xdebug:
+        description: Disables XDebug, as Blackfire may conflict with it.
         steps:
             - run:
                   name: 'Blackfire: Disable XDebug'
@@ -70,6 +71,7 @@ commands:
                       $SUDO sed -i -e "s/zend_extension=/;zend_extension=/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
     install-player:
+        description: Installs Blackfire player, to run your scenarios.
         steps:
             - run:
                   name: 'Blackfire: Install Player'
