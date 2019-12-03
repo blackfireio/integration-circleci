@@ -1,6 +1,13 @@
 version: 2.1
 description: |
-    Installs Blackfire PHP probe.
+    This orb installs and configures Blackfire for PHP.
+    You need an account on https://blackfire.io to use this orb.
+
+    Blackfire is the Code Performance Management solution for developers
+    to find and fix performance bottlenecks in dev, test/staging and production.
+
+    It makes it possible to drill down to function/method call level to understand and fix performance bottlenecks.
+    Its wide variety of automation options makes it a breathe to add it to a development and testing workflow.
 
 display:
     home_url: https://github.com/blackfireio/integration-circleci

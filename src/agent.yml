@@ -1,6 +1,13 @@
 version: 2.1
 description: |
-    Installs and configure Blackfire agent and CLI.
+    This orb installs and configure Blackfire agent and CLI tool.
+    You need an account on https://blackfire.io to use this orb.
+
+    Blackfire is the Code Performance Management solution for developers
+    to find and fix performance bottlenecks in dev, test/staging and production.
+
+    The "agent" is the component that aggregates profile data collected by the probe from your application engine
+    (PHP, Python...), before sending it to Blackfire.io servers so that you can display and analyze it.
 
 display:
     home_url: https://github.com/blackfireio/integration-circleci
