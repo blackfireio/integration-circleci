@@ -1,7 +1,6 @@
 version: 2.1
 description: |
     Installs Blackfire PHP probe.
-    Source: https://github.com/blackfireio/integration-circleci
 
 display:
     home_url: https://github.com/blackfireio/integration-circleci

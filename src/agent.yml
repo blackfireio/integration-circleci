@@ -1,7 +1,6 @@
 version: 2.1
 description: |
     Installs and configure Blackfire agent and CLI.
-    Source: https://github.com/blackfireio/integration-circleci
 
 display:
     home_url: https://github.com/blackfireio/integration-circleci
