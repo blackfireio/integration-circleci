@@ -38,32 +38,19 @@ commands:
                 description: Environment variable name in which your client token is stored.
                 type: env_var_name
                 default: BLACKFIRE_CLIENT_TOKEN
+
         steps:
-            - run:
-                  name: 'Blackfire: Sanity checks'
-                  command: |
-                      function test_env_var {
-                          if [ -z "$(printenv $1)" ]; then
-                              echo "Error: ${1} is empty. Please ensure the environment variable ${1} has been added."
-                              exit 1
-                          fi
-                      }
-
-                      test_env_var << parameters.server_id >>
-                      test_env_var << parameters.server_token >>
-                      test_env_var << parameters.client_id >>
-                      test_env_var << parameters.client_token >>
-
             - blackfire-agent/setup:
-                  server_id: ${<< parameters.server_id >>}
-                  server_token: ${<< parameters.server_token >>}
-                  client_id: ${<< parameters.client_id >>}
-                  client_token: ${<< parameters.client_token >>}
+                  server_id: << parameters.server_id >>
+                  server_token: << parameters.server_token >>
+                  client_id: << parameters.client_id >>
+                  client_token: << parameters.client_token >>
             - disable-xdebug
             - install-player
             - run:
                   name: 'Blackfire: Install PHP probe'
                   command: |
+                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
                       sudo apt-get install blackfire-php
                       php -v
 
@@ -72,16 +59,18 @@ commands:
             - run:
                   name: 'Blackfire: Disable XDebug'
                   command: |
-                      sudo sed -i -e "s/zend_extension=/;zend_extension=/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                      $SUDO sed -i -e "s/zend_extension=/;zend_extension=/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
     install-player:
         steps:
             - run:
                   name: 'Blackfire: Install Player'
                   command: |
+                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
                       curl -OLsS https://get.blackfire.io/blackfire-player.phar
                       chmod +x blackfire-player.phar
-                      sudo mv blackfire-player.phar /usr/local/bin/blackfire-player
+                      $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
                       blackfire-player --version
 
 examples:

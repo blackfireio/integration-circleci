@@ -9,44 +9,76 @@ commands:
     register:
         parameters:
             server_id:
-                type: string
+                description: Environment variable name in which your server ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_ID
             server_token:
-                type: string
+                description: Environment variable name in which your server token is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_TOKEN
             client_id:
-                type: string
+                description: Environment variable name in which your client ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_ID
             client_token:
-                type: string
+                description: Environment variable name in which your client token is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_TOKEN
         steps:
+            - run:
+                  name: 'Blackfire: Sanity checks'
+                  command: |
+                      function test_env_var {
+                          if [ -z "$(printenv $1)" ]; then
+                              echo "Error: ${1} is empty. Please ensure the environment variable ${1} has been added."
+                              exit 1
+                          fi
+                      }
+                      test_env_var << parameters.server_id >>
+                      test_env_var << parameters.server_token >>
+                      test_env_var << parameters.client_id >>
+                      test_env_var << parameters.client_token >>
+
             - run:
                   name: 'Blackfire: Register agent and client'
                   command: |
-                      sudo blackfire-agent -register \
-                          --server-id=<< parameters.server_id >> \
-                          --server-token=<< parameters.server_token >>
-                      sudo /etc/init.d/blackfire-agent restart
+                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                      $SUDO blackfire-agent -register \
+                          --server-id=${<< parameters.server_id >>} \
+                          --server-token=${<< parameters.server_token >>}
+                      $SUDO /etc/init.d/blackfire-agent restart
                       blackfire config \
-                          --client-id=<< parameters.client_id >> \
-                          --client-token=<< parameters.client_token >>
+                          --client-id=${<< parameters.client_id >>} \
+                          --client-token=${<< parameters.client_token >>}
 
     setup:
         parameters:
             server_id:
-                type: string
+                description: Environment variable name in which your server ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_ID
             server_token:
-                type: string
+                description: Environment variable name in which your server token is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_TOKEN
             client_id:
-                type: string
+                description: Environment variable name in which your client ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_ID
             client_token:
-                type: string
+                description: Environment variable name in which your client token is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_TOKEN
 
         steps:
             - run:
                   name: 'Blackfire: Install Debian package'
                   command: |
-                      wget -q -O - https://packages.blackfire.io/gpg.key | sudo apt-key add -
-                      echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
-                      sudo apt update
-                      sudo apt-get install blackfire-agent
+                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                      wget -q -O - https://packages.blackfire.io/gpg.key | $SUDO apt-key add -
+                      echo "deb http://packages.blackfire.io/debian any main" | $SUDO tee /etc/apt/sources.list.d/blackfire.list
+                      $SUDO apt update
+                      $SUDO apt-get install blackfire-agent
                       echo ""
                       blackfire-agent -v
                       blackfire version
@@ -72,9 +104,10 @@ commands:
             - run:
                   name: 'Blackfire: Install RedHat package'
                   command: |
-                      sudo yum install pygpgme
-                      wget -O - "http://packages.blackfire.io/fedora/blackfire.repo" | sudo tee /etc/yum.repos.d/blackfire.repo
-                      sudo yum install blackfire-agent
+                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                      $SUDO yum install pygpgme
+                      wget -O - "http://packages.blackfire.io/fedora/blackfire.repo" | $SUDO tee /etc/yum.repos.d/blackfire.repo
+                      $SUDO yum install blackfire-agent
                       echo "\n"
                       blackfire-agent -v
                       blackfire version
