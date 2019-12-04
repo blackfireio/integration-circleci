@@ -58,7 +58,7 @@ commands:
                   name: 'Blackfire: Install PHP probe'
                   command: |
                       if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-                      sudo apt-get install blackfire-php
+                      $SUDO apt-get install blackfire-php
                       php -v
 
     disable-xdebug:
