@@ -13,7 +13,7 @@ display:
     home_url: https://github.com/blackfireio/integration-circleci
 
 orbs:
-    blackfire-agent: blackfireio/agent@dev:0.1
+    blackfire-agent: blackfireio/agent@1.0
 
 commands:
     setup:
