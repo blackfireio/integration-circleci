@@ -106,13 +106,21 @@ commands:
 
         parameters:
             server_id:
-                type: string
+                description: Environment variable name in which your server ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_ID
             server_token:
-                type: string
+                description: Environment variable name in which your server token is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_TOKEN
             client_id:
-                type: string
+                description: Environment variable name in which your client ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_ID
             client_token:
-                type: string
+                description: Environment variable name in which your client token is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_TOKEN
 
         steps:
             - run:
