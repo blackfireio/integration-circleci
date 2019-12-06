@@ -155,8 +155,4 @@ examples:
                         - image: circleci/php:7.3-node
                     steps:
                         - checkout
-                        - blackfire-agent/setup:
-                              server_id: your_server_id
-                              server_token: your_server_token
-                              client_id: your_client_id
-                              client_token: your_client_token
+                        - blackfire-agent/setup
