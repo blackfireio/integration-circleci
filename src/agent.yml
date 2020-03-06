@@ -10,7 +10,8 @@ description: |
     (PHP, Python...), before sending it to Blackfire.io servers so that you can display and analyze it.
 
 display:
-    home_url: https://github.com/blackfireio/integration-circleci
+    home_url: https://blackfire.io/
+    source_url: https://github.com/blackfireio/integration-circleci
 
 commands:
     register:

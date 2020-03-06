@@ -10,7 +10,8 @@ description: |
     Its wide variety of automation options makes it a breathe to add it to a development and testing workflow.
 
 display:
-    home_url: https://github.com/blackfireio/integration-circleci
+    home_url: https://blackfire.io/
+    source_url: https://github.com/blackfireio/integration-circleci
 
 orbs:
     blackfire-agent: blackfireio/agent@1.0
