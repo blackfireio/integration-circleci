@@ -1,6 +1,6 @@
 version: 2.1
 description: |
-    This orb installs and configure Blackfire agent and CLI tool.
+    This orb installs and configures Blackfire agent and CLI tool.
     You need an account on https://blackfire.io to use this orb.
 
     Blackfire is the Code Performance Management solution for developers
@@ -140,6 +140,77 @@ commands:
                   server_token: << parameters.server_token >>
                   client_id: << parameters.client_id >>
                   client_token: << parameters.client_token >>
+
+    build-trigger:
+        description: Triggers a Blackfire build using a webhook.
+
+        parameters:
+            endpoint:
+                description: Endpoint for reaching your application out.
+                type: string
+
+            server-id:
+                description: Environment variable name in which your server ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_SERVER_ID
+
+            title:
+                description: Title of the triggered build.
+                type: string
+                default: "CircleCI '${CIRCLE_JOB}'"
+
+            external-id:
+                description: A unique identifier for the build. Defaults to the latest git commit sha1.
+                type: string
+                default: "${CIRCLE_SHA1}"
+
+            external-parent-id:
+                description: The unique identifier of the parent build, to compare with the current build, like the reference Git commit sha1.
+                type: string
+                default: ""
+
+            external-url:
+                description: A URL related to the build, like a Pull Request.
+                type: string
+                default: "${CIRCLE_BUILD_URL}"
+
+            http-username:
+                description: The username for HTTP Basic authentication on the endpoint.
+                type: string
+                default: ""
+
+            http-password:
+                description: The password for HTTP Basic authentication on the endpoint.
+                type: string
+                default: ""
+
+            ip:
+                description: The IP for forcing DNS.
+                type: string
+                default: ""
+
+            ssl-no-verify:
+                description: If true, disables SSL certificates verification (this is insecure)
+                type: boolean
+                default: false
+
+        steps:
+            - run:
+                  name: "Blackfire: Triggering a build"
+                  command: |
+                      if [ -n "<<parameters.external-parent-id>>" ]; then export $EXTERNAL_PARENT_ID="--external-parent-id=<<parameters.external-parent-id>>" else export $EXTERNAL_PARENT_ID="" fi;
+                      if [ -n "<<parameters.http-username>>" ]; then export $HTTP_USERNAME="--http-username=<<parameters.http-username>>" else export $HTTP_USERNAME="" fi;
+                      if [ -n "<<parameters.http-password>>" ]; then export $HTTP_PASSWORD="--http-password=<<parameters.http-password>>" else export $HTTP_PASSWORD="" fi;
+                      if [ -n "<<parameters.ip>>" ]; then export $IP="--ip=<<parameters.ip>>" else export $IP="" fi;
+                      if [ "<<parameters.ssl-no-verify>>" == "true" ]; then export $SSL_NO_VERIFY="--ssl-no-verify" else export $SSL_NO_VERIFY="" fi;
+
+                      blackfire build-trigger \
+                          << parameters.endpoint >> \
+                          --server-id=${<< parameters.server-id >>} \
+                          --title=<< parameters.title >> \
+                          --external-id=<< parameters.external-id >> \
+                          --external-url=<< parameters.external-url >> \
+                          $EXTERNAL_PARENT_ID $HTTP_USERNAME $HTTP_PASSWORD $IP $SSL_NO_VERIFY
 
 examples:
     install_agent:
