@@ -157,7 +157,7 @@ commands:
             title:
                 description: Title of the triggered build.
                 type: string
-                default: "CircleCI '${CIRCLE_JOB}'"
+                default: "CircleCI '${CIRCLE_JOB}' ${CIRCLE_BUILD_NUM}"
 
             external-id:
                 description: A unique identifier for the build. Defaults to the latest git commit sha1.
@@ -198,19 +198,19 @@ commands:
             - run:
                   name: "Blackfire: Triggering a build"
                   command: |
-                      if [ -n "<<parameters.external-parent-id>>" ]; then export $EXTERNAL_PARENT_ID="--external-parent-id=<<parameters.external-parent-id>>" else export $EXTERNAL_PARENT_ID="" fi;
-                      if [ -n "<<parameters.http-username>>" ]; then export $HTTP_USERNAME="--http-username=<<parameters.http-username>>" else export $HTTP_USERNAME="" fi;
-                      if [ -n "<<parameters.http-password>>" ]; then export $HTTP_PASSWORD="--http-password=<<parameters.http-password>>" else export $HTTP_PASSWORD="" fi;
-                      if [ -n "<<parameters.ip>>" ]; then export $IP="--ip=<<parameters.ip>>" else export $IP="" fi;
-                      if [ "<<parameters.ssl-no-verify>>" == "true" ]; then export $SSL_NO_VERIFY="--ssl-no-verify" else export $SSL_NO_VERIFY="" fi;
+                      if [ -n "<<parameters.external-parent-id>>" ]; then EXTERNAL_PARENT_ID="--external-parent-id=<<parameters.external-parent-id>>"; else EXTERNAL_PARENT_ID=""; fi;
+                      if [ -n "<<parameters.http-username>>" ]; then HTTP_USERNAME="--http-username=<<parameters.http-username>>"; else HTTP_USERNAME=""; fi;
+                      if [ -n "<<parameters.http-password>>" ]; then HTTP_PASSWORD="--http-password=<<parameters.http-password>>"; else HTTP_PASSWORD=""; fi;
+                      if [ -n "<<parameters.ip>>" ]; then IP="--ip=<<parameters.ip>>"; else IP=""; fi;
+                      if [ "<<parameters.ssl-no-verify>>" == "true" ]; then SSL_NO_VERIFY="--ssl-no-verify"; else SSL_NO_VERIFY=""; fi;
 
                       blackfire build-trigger \
                           << parameters.endpoint >> \
-                          --server-id=${<< parameters.server-id >>} \
-                          --title=<< parameters.title >> \
-                          --external-id=<< parameters.external-id >> \
+                          --env=${<< parameters.server-id >>} \
+                          --title="<< parameters.title >>" \
+                          --external-id="<< parameters.external-id >>" \
                           --external-url=<< parameters.external-url >> \
-                          $EXTERNAL_PARENT_ID $HTTP_USERNAME $HTTP_PASSWORD $IP $SSL_NO_VERIFY
+                          $EXTERNAL_PARENT_ID $HTTP_USERNAME $HTTP_PASSWORD $IP $SSL_NO_VERIFY;
 
 examples:
     install_agent:
