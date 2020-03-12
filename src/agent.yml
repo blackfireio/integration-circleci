@@ -206,11 +206,12 @@ commands:
             - run:
                   name: "Blackfire: Triggering a build"
                   command: |
-                      if [ -n "<<parameters.external-parent-id>>" ]; then EXTERNAL_PARENT_ID="--external-parent-id=<<parameters.external-parent-id>>"; else EXTERNAL_PARENT_ID=""; fi;
-                      if [ -n "<<parameters.http-username>>" ]; then HTTP_USERNAME="--http-username=<<parameters.http-username>>"; else HTTP_USERNAME=""; fi;
-                      if [ -n "<<parameters.http-password>>" ]; then HTTP_PASSWORD="--http-password=<<parameters.http-password>>"; else HTTP_PASSWORD=""; fi;
-                      if [ -n "<<parameters.ip>>" ]; then IP="--ip=<<parameters.ip>>"; else IP=""; fi;
-                      if [ "<<parameters.ssl-no-verify>>" == "true" ]; then SSL_NO_VERIFY="--ssl-no-verify"; else SSL_NO_VERIFY=""; fi;
+                      if [ -n "<<parameters.external-parent-id>>" ]; then BF_TOKEN="--token=<<parameters.token>>"; else BF_TOKEN=""; fi;
+                      if [ -n "<<parameters.external-parent-id>>" ]; then BF_EXTERNAL_PARENT_ID="--external-parent-id=<<parameters.external-parent-id>>"; else BF_EXTERNAL_PARENT_ID=""; fi;
+                      if [ -n "<<parameters.http-username>>" ]; then BF_HTTP_USERNAME="--http-username=<<parameters.http-username>>"; else BF_HTTP_USERNAME=""; fi;
+                      if [ -n "<<parameters.http-password>>" ]; then BF_HTTP_PASSWORD="--http-password=<<parameters.http-password>>"; else BF_HTTP_PASSWORD=""; fi;
+                      if [ -n "<<parameters.ip>>" ]; then BF_IP="--ip=<<parameters.ip>>"; else BF_IP=""; fi;
+                      if [ "<<parameters.ssl-no-verify>>" == "true" ]; then BF_SSL_NO_VERIFY="--ssl-no-verify"; else BF_SSL_NO_VERIFY=""; fi;
 
                       blackfire build-trigger \
                           << parameters.endpoint >> \
@@ -218,7 +219,7 @@ commands:
                           --title="<< parameters.title >>" \
                           --external-id="<< parameters.external-id >>" \
                           --external-url=<< parameters.external-url >> \
-                          $EXTERNAL_PARENT_ID $HTTP_USERNAME $HTTP_PASSWORD $IP $SSL_NO_VERIFY;
+                          $BF_TOKEN $BF_EXTERNAL_PARENT_ID $BF_HTTP_USERNAME $BF_HTTP_PASSWORD $BF_IP $BF_SSL_NO_VERIFY;
 
 examples:
     install_agent:
