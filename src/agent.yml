@@ -237,3 +237,22 @@ examples:
                     steps:
                         - checkout
                         - blackfire-agent/setup
+
+    build_trigger:
+        description: Trigger a Blackfire build as described in https://blackfire.io/docs/reference-guide/builds-and-integrations
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire-agent: blackfireio/agent@x.y
+
+            jobs:
+                blackfire-build-example:
+                    docker:
+                        - image: circleci/php:7.3-node
+                    steps:
+                        - checkout
+                        - blackfire-agent/build-trigger:
+                            endpoint: "https://staging.my-webapp.tld/"
+                            # Blackfire Environment name or UUID
+                            environment: My Blackfire Environment Name
