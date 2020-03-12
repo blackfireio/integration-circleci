@@ -149,10 +149,13 @@ commands:
                 description: Endpoint for reaching your application out.
                 type: string
 
-            server-id:
-                description: Environment variable name in which your server ID is stored.
-                type: env_var_name
-                default: BLACKFIRE_SERVER_ID
+            environment:
+                description: |
+                    Environment name or UUID on which the build is triggered.
+                    Server-ID can also be used.
+                    Defaults to BLACKFIRE_SERVER_ID environment variable value.
+                type: string
+                default: ${BLACKFIRE_SERVER_ID}
 
             title:
                 description: Title of the triggered build.
@@ -211,7 +214,7 @@ commands:
 
                       blackfire build-trigger \
                           << parameters.endpoint >> \
-                          --env=${<< parameters.server-id >>} \
+                          --env=<< parameters.environment >> \
                           --title="<< parameters.title >>" \
                           --external-id="<< parameters.external-id >>" \
                           --external-url=<< parameters.external-url >> \
