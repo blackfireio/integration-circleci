@@ -159,6 +159,11 @@ commands:
                 type: string
                 default: "CircleCI '${CIRCLE_JOB}' ${CIRCLE_BUILD_NUM}"
 
+            token:
+                description: Token to use for the build.
+                type: string
+                default: ""
+
             external-id:
                 description: A unique identifier for the build. Defaults to the latest git commit sha1.
                 type: string
