@@ -206,7 +206,7 @@ commands:
             - run:
                   name: "Blackfire: Triggering a build"
                   command: |
-                      if [ -n "<<parameters.external-parent-id>>" ]; then BF_TOKEN="--token=<<parameters.token>>"; else BF_TOKEN=""; fi;
+                      if [ -n "<<parameters.token>>" ]; then BF_TOKEN="--token=<<parameters.token>>"; else BF_TOKEN=""; fi;
                       if [ -n "<<parameters.external-parent-id>>" ]; then BF_EXTERNAL_PARENT_ID="--external-parent-id=<<parameters.external-parent-id>>"; else BF_EXTERNAL_PARENT_ID=""; fi;
                       if [ -n "<<parameters.http-username>>" ]; then BF_HTTP_USERNAME="--http-username=<<parameters.http-username>>"; else BF_HTTP_USERNAME=""; fi;
                       if [ -n "<<parameters.http-password>>" ]; then BF_HTTP_PASSWORD="--http-password=<<parameters.http-password>>"; else BF_HTTP_PASSWORD=""; fi;
