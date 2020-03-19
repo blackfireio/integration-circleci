@@ -1,0 +1,107 @@
+version: 2.1
+description: |
+    This orb installs and configures Blackfire agent and CLI tool.
+    You need an account on https://blackfire.io to use this orb.
+
+    Blackfire is the Code Performance Management solution for developers
+    to find and fix performance bottlenecks in dev, test/staging and production.
+
+    The "agent" is the component that aggregates profile data collected by the probe from your application engine
+    (PHP, Python...), before sending it to Blackfire.io servers so that you can display and analyze it.
+
+display:
+    home_url: https://blackfire.io/
+    source_url: https://github.com/blackfireio/integration-circleci
+
+executors:
+    php:
+        docker:
+            - image: circleci/php:7.4
+
+commands:
+    install-player:
+        description: Installs Blackfire player, to run your scenarios.
+        steps:
+                - run:
+                    name: 'Blackfire: Install Player'
+                    command: |
+                        if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                        curl -OLsS https://get.blackfire.io/blackfire-player.phar
+                        chmod +x blackfire-player.phar
+                        $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
+                        blackfire-player --version
+
+jobs:
+    player-run:
+        executor: php
+        description: Runs a Blackfire Player scenario.
+        parameters:
+            scenario:
+                description: Path to the scenario file to run.
+                type: string
+            environment-name:
+                description: |
+                    Name of the Blackfire environment to use, or its UUID.
+                    Overrides any environment name set within the scenario itself.
+                type: string
+                default: ""
+            endpoint:
+                description: |
+                    Endpoint to use for running the scenario.
+                    Overrides any endpoint specified in the scenario itself.
+                    i.e. "https://my-endpoint.tld"
+                type: string
+                default: ""
+            variables:
+                description: |
+                    Variables to pass to Blackfire Player, overriding values defined in the scenario.
+                    Format is "<variable_name>=<value>".
+                    To specify several variables, use "," as a separator:
+                    "variable_name1=value1,variable_name2=value2"
+                type: string
+                default: ""
+            before-run:
+                description: Steps to run before running Blackfire Player
+                type: steps
+                default: []
+            after-run:
+                description: Steps to run after running Blackfire Player
+                type: steps
+                default: []
+            client-id:
+                description: Environment variable name in which your Blackfire client ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_ID
+            client-token:
+                description: Environment variable name in which your Blackfire client token is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_TOKEN
+
+        steps:
+            - checkout
+            - install-player
+            - when:
+                condition: <<parameters.before-run>>
+                name: Run before_run hook steps
+                steps: <<parameters.before-run>>
+            - run:
+                name: Blackfire Player run
+                command: |
+                    if [ -n "<<parameters.environment-name>>" ]; then BF_ENVIRONMENT="--blackfire-env=<<parameters.environment-name>>"; else BF_ENVIRONMENT=""; fi;
+                    if [ -n "<<parameters.endpoint>>" ]; then BF_ENDPOINT="--endpoint=<<parameters.endpoint>>"; else BF_ENDPOINT=""; fi;
+                    if [[ <<parameters.client-id>> != "BLACKFIRE_CLIENT_ID" ]]; then BLACKFIRE_CLIENT_ID=${<<parameters.client-id>>}; fi
+                    if [[ <<parameters.client-token>> != "BLACKFIRE_CLIENT_TOKEN" ]]; then BLACKFIRE_CLIENT_TOKEN=${<<parameters.client-token>>}; fi
+
+                    # Variables to inject
+                    variable_options=""
+                    passed_variables="<<parameters.variables>>"
+                    variables=(${passed_variables//,/$'\n'})
+                    for variable in "${variables[@]}"; do
+                        variable_options="${variable_options} --variable \"$variable\""
+                    done;
+
+                    echo "blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options"
+            - when:
+                condition: <<parameters.after-run>>
+                name: Run after_run hook steps
+                steps: <<parameters.after-run>>
