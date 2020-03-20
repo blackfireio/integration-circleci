@@ -94,11 +94,13 @@ jobs:
 
                     # Variables to inject
                     variable_options=""
-                    passed_variables="<<parameters.variables>>"
-                    variables=(${passed_variables//,/$'\n'})
+                    old_ifs=$IFS
+                    IFS=","
+                    read -ra variables < <(echo "<<parameters.variables>>")
                     for variable in "${variables[@]}"; do
                         variable_options="${variable_options} --variable \"$variable\""
                     done;
+                    IFS=$old_ifs
 
                     echo "blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options"
             - when:
