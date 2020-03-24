@@ -22,14 +22,14 @@ commands:
     install-player:
         description: Installs Blackfire player, to run your scenarios.
         steps:
-                - run:
-                    name: 'Blackfire: Install Player'
-                    command: |
-                        if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-                        curl -OLsS https://get.blackfire.io/blackfire-player.phar
-                        chmod +x blackfire-player.phar
-                        $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
-                        blackfire-player --version
+            - run:
+                name: 'Blackfire: Install Player'
+                command: |
+                    if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                    curl -OLsS https://get.blackfire.io/blackfire-player.phar
+                    chmod +x blackfire-player.phar
+                    $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
+                    blackfire-player --version
 
 jobs:
     player-run:
