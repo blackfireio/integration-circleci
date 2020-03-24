@@ -1,22 +1,77 @@
 version: 2.1
 description: |
-    This orb installs and configures Blackfire agent and CLI tool.
-    You need an account on https://blackfire.io to use this orb.
+    This orb installs Blackfire Player and enables you to run .bkf scenarios and trigger profiles from them.
+    You need a Premium or Enterprise Blackfire account on https://blackfire.io to use this orb.
+
+    Blackfire Player is a powerful Web Crawling, Web Testing, and Web Scraper application. It provides a nice DSL to
+    crawl HTTP services, assert responses, and extract data from HTML/XML/JSON responses.
 
     Blackfire is the Code Performance Management solution for developers
     to find and fix performance bottlenecks in dev, test/staging and production.
-
-    The "agent" is the component that aggregates profile data collected by the probe from your application engine
-    (PHP, Python...), before sending it to Blackfire.io servers so that you can display and analyze it.
 
 display:
     home_url: https://blackfire.io/
     source_url: https://github.com/blackfireio/integration-circleci
 
-executors:
-    php:
-        docker:
-            - image: circleci/php:7.4
+examples:
+    run_scenario:
+        description: Run a Blackfire Player scenario with a simple command, triggering a build with profiles.
+
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire: blackfireio/php@x.y
+                blackfire-player: blackfireio/player@x.y
+
+            blackfire_player:
+                docker:
+                    - image: circleci/php:7.4-fpm-node
+                steps:
+                    - checkout
+                    - blackfire-player/run-scenario:
+                          # Assuming scenario.bkf is at the root of the codebase.
+                          scenario: scenario.bkf
+                          # Can be only a part of the environment name, as long as it is not ambiguous.
+                          environment-name: MyEnvironmentName
+                          endpoint: "https://myendpoint.tld"
+                          variables: "variable_name1=value1,variable_name2=value2,foo=bar"
+
+    run_scenario_local:
+        description: |
+            Run a Blackfire Player scenario locally, triggering a build with profiles.
+            This example uses Symfony local server: https://symfony.com/doc/current/setup/symfony_server.html
+
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire: blackfireio/php@x.y
+                blackfire-player: blackfireio/player@x.y
+
+            blackfire_player:
+                docker:
+                    - image: circleci/php:7.4-fpm-node
+                steps:
+                    - checkout
+                    - run: composer install -n --prefer-dist
+                    - run:
+                          name: "Install & run Symfony server"
+                          environment:
+                              # Ensure to run in "prod" Symfony environment
+                              APP_ENV: prod
+                          command: |
+                              wget https://get.symfony.com/cli/installer -O - | bash
+                              ~/.symfony/bin/symfony local:server:start -d
+                              # Now the server is listening to localhost:8000
+                    - blackfire/setup
+                    - blackfire-player/run-scenario:
+                          # Assuming scenario.bkf is at the root of the codebase.
+                          scenario: scenario.bkf
+                          # Can be only a part of the environment name, as long as it is not ambiguous.
+                          environment-name: MyEnvironmentName
+                          endpoint: "https://localhost:8000"
+                          variables: "variable_name1=value1,variable_name2=value2,foo=bar"
 
 commands:
     install-player:
@@ -32,7 +87,10 @@ commands:
                     blackfire-player --version
 
     run-scenario:
-        description: Runs a Blackfire Player scenario.
+        description: |
+            Runs a Blackfire Player scenario.
+            To run multiple scenarios, make sure to use the "load" instruction in your BKF file.
+            See https://blackfire.io/docs/player/index#organizing-scenario-files
         parameters:
             scenario:
                 description: Path to the scenario file to run, absolute or relative to working directory.
