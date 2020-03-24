@@ -63,7 +63,9 @@ commands:
                           --client-token=${<< parameters.client_token >>}
 
     setup:
-        description: Installs and configures Blackfire agent.
+        description: |
+            Installs and configures Blackfire agent.
+            setup command MUST BE CALLED BEFORE.
 
         parameters:
             server_id:
