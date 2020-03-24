@@ -14,7 +14,8 @@ display:
     source_url: https://github.com/blackfireio/integration-circleci
 
 orbs:
-    blackfire-agent: blackfireio/agent@1.0
+    blackfire-agent: blackfireio/agent@dev:1.1
+    blackfire-player: blackfireio/player@dev:1.0
 
 commands:
     setup:
@@ -75,14 +76,7 @@ commands:
     install-player:
         description: Installs Blackfire player, to run your scenarios.
         steps:
-            - run:
-                  name: 'Blackfire: Install Player'
-                  command: |
-                      if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-                      curl -OLsS https://get.blackfire.io/blackfire-player.phar
-                      chmod +x blackfire-player.phar
-                      $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
-                      blackfire-player --version
+            - blackfire-player/install-player
 
 examples:
     blackfire_php_default_env_vars:

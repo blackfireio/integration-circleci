@@ -1,0 +1,148 @@
+version: 2.1
+description: |
+    This orb installs Blackfire Player and enables you to run .bkf scenarios and trigger profiles from them.
+    You need a Premium or Enterprise Blackfire account on https://blackfire.io to use this orb.
+
+    Blackfire Player is a powerful Web Crawling, Web Testing, and Web Scraper application. It provides a nice DSL to
+    crawl HTTP services, assert responses, and extract data from HTML/XML/JSON responses.
+
+    Blackfire is the Code Performance Management solution for developers
+    to find and fix performance bottlenecks in dev, test/staging and production.
+
+display:
+    home_url: https://blackfire.io/
+    source_url: https://github.com/blackfireio/integration-circleci
+
+examples:
+    run_scenario:
+        description: Run a Blackfire Player scenario with a simple command, triggering a build with profiles.
+
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire: blackfireio/php@x.y
+                blackfire-player: blackfireio/player@x.y
+
+            blackfire_player:
+                docker:
+                    - image: circleci/php:7.4-fpm-node
+                steps:
+                    - checkout
+                    - blackfire-player/run-scenario:
+                          # Assuming scenario.bkf is at the root of the codebase.
+                          scenario: scenario.bkf
+                          # Can be only a part of the environment name, as long as it is not ambiguous.
+                          environment-name: MyEnvironmentName
+                          endpoint: "https://myendpoint.tld"
+                          variables: "variable_name1=value1,variable_name2=value2,foo=bar"
+
+    run_scenario_local:
+        description: |
+            Run a Blackfire Player scenario locally, triggering a build with profiles.
+            This example uses Symfony local server: https://symfony.com/doc/current/setup/symfony_server.html
+
+        usage:
+            version: 2.1
+
+            orbs:
+                blackfire: blackfireio/php@x.y
+                blackfire-player: blackfireio/player@x.y
+
+            blackfire_player:
+                docker:
+                    - image: circleci/php:7.4-fpm-node
+                steps:
+                    - checkout
+                    - run: composer install -n --prefer-dist
+                    - run:
+                          name: "Install & run Symfony server"
+                          environment:
+                              # Ensure to run in "prod" Symfony environment
+                              APP_ENV: prod
+                          command: |
+                              wget https://get.symfony.com/cli/installer -O - | bash
+                              ~/.symfony/bin/symfony local:server:start -d
+                              # Now the server is listening to localhost:8000
+                    - blackfire/setup
+                    - blackfire-player/run-scenario:
+                          # Assuming scenario.bkf is at the root of the codebase.
+                          scenario: scenario.bkf
+                          # Can be only a part of the environment name, as long as it is not ambiguous.
+                          environment-name: MyEnvironmentName
+                          endpoint: "https://localhost:8000"
+                          variables: "variable_name1=value1,variable_name2=value2,foo=bar"
+
+commands:
+    install-player:
+        description: Installs Blackfire player, to run your scenarios.
+        steps:
+            - run:
+                name: 'Blackfire: Install Player'
+                command: |
+                    if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                    curl -OLsS https://get.blackfire.io/blackfire-player.phar
+                    chmod +x blackfire-player.phar
+                    $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
+                    blackfire-player --version
+
+    run-scenario:
+        description: |
+            Runs a Blackfire Player scenario.
+            To run multiple scenarios, make sure to use the "load" instruction in your BKF file.
+            See https://blackfire.io/docs/player/index#organizing-scenario-files
+        parameters:
+            scenario:
+                description: Path to the scenario file to run, absolute or relative to working directory.
+                type: string
+            environment-name:
+                description: |
+                    Name of the Blackfire environment to use, or its UUID.
+                    Overrides any environment name set within the scenario itself.
+                type: string
+                default: ""
+            endpoint:
+                description: |
+                    Endpoint to use for running the scenario.
+                    Overrides any endpoint specified in the scenario itself.
+                    i.e. "https://my-endpoint.tld"
+                type: string
+                default: ""
+            variables:
+                description: |
+                    Variables to pass to Blackfire Player, overriding values defined in the scenario.
+                    Format is "<variable_name>=<value>".
+                    To specify several variables, use "," as a separator:
+                    "variable_name1=value1,variable_name2=value2"
+                type: string
+                default: ""
+            client-id:
+                description: Environment variable name in which your Blackfire client ID is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_ID
+            client-token:
+                description: Environment variable name in which your Blackfire client token is stored.
+                type: env_var_name
+                default: BLACKFIRE_CLIENT_TOKEN
+
+        steps:
+            - install-player
+            - run:
+                name: Blackfire Player run
+                command: |
+                    if [ -n "<<parameters.environment-name>>" ]; then BF_ENVIRONMENT="--blackfire-env=<<parameters.environment-name>>"; else BF_ENVIRONMENT=""; fi;
+                    if [ -n "<<parameters.endpoint>>" ]; then BF_ENDPOINT="--endpoint=<<parameters.endpoint>>"; else BF_ENDPOINT=""; fi;
+                    if [[ <<parameters.client-id>> != "BLACKFIRE_CLIENT_ID" ]]; then BLACKFIRE_CLIENT_ID=${<<parameters.client-id>>}; fi
+                    if [[ <<parameters.client-token>> != "BLACKFIRE_CLIENT_TOKEN" ]]; then BLACKFIRE_CLIENT_TOKEN=${<<parameters.client-token>>}; fi
+                    # Variables to inject
+                    variable_options=""
+                    old_ifs=$IFS
+                    IFS=","
+                    read -ra variables < <(echo "<<parameters.variables>>")
+                    for variable in "${variables[@]}"; do
+                        variable_options="${variable_options} --variable \"$variable\""
+                    done;
+                    IFS=$old_ifs
+
+                    echo blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options
+                    blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options
