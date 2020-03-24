@@ -14,7 +14,7 @@ display:
     source_url: https://github.com/blackfireio/integration-circleci
 
 orbs:
-    blackfire-agent: blackfireio/agent@dev:1.2
+    blackfire-agent: blackfireio/agent@dev:1.1
     blackfire-player: blackfireio/player@dev:1.0
 
 commands:
