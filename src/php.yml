@@ -59,6 +59,7 @@ commands:
                   name: 'Blackfire: Install PHP probe'
                   command: |
                       if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+                      $SUDO docker-php-ext-configure opcache && sudo docker-php-ext-install opcache
                       $SUDO apt-get install blackfire-php
                       php -v
 
