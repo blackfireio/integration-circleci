@@ -31,13 +31,11 @@ commands:
                     $SUDO mv blackfire-player.phar /usr/local/bin/blackfire-player
                     blackfire-player --version
 
-jobs:
-    player-run:
-        executor: php
+    run-scenario:
         description: Runs a Blackfire Player scenario.
         parameters:
             scenario:
-                description: Path to the scenario file to run.
+                description: Path to the scenario file to run, absolute or relative to working directory.
                 type: string
             environment-name:
                 description: |
@@ -60,14 +58,6 @@ jobs:
                     "variable_name1=value1,variable_name2=value2"
                 type: string
                 default: ""
-            before-run:
-                description: Steps to run before running Blackfire Player
-                type: steps
-                default: []
-            after-run:
-                description: Steps to run after running Blackfire Player
-                type: steps
-                default: []
             client-id:
                 description: Environment variable name in which your Blackfire client ID is stored.
                 type: env_var_name
@@ -78,12 +68,7 @@ jobs:
                 default: BLACKFIRE_CLIENT_TOKEN
 
         steps:
-            - checkout
             - install-player
-            - when:
-                condition: <<parameters.before-run>>
-                name: Run before_run hook steps
-                steps: <<parameters.before-run>>
             - run:
                 name: Blackfire Player run
                 command: |
@@ -91,7 +76,6 @@ jobs:
                     if [ -n "<<parameters.endpoint>>" ]; then BF_ENDPOINT="--endpoint=<<parameters.endpoint>>"; else BF_ENDPOINT=""; fi;
                     if [[ <<parameters.client-id>> != "BLACKFIRE_CLIENT_ID" ]]; then BLACKFIRE_CLIENT_ID=${<<parameters.client-id>>}; fi
                     if [[ <<parameters.client-token>> != "BLACKFIRE_CLIENT_TOKEN" ]]; then BLACKFIRE_CLIENT_TOKEN=${<<parameters.client-token>>}; fi
-
                     # Variables to inject
                     variable_options=""
                     old_ifs=$IFS
@@ -102,8 +86,5 @@ jobs:
                     done;
                     IFS=$old_ifs
 
-                    echo "blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options"
-            - when:
-                condition: <<parameters.after-run>>
-                name: Run after_run hook steps
-                steps: <<parameters.after-run>>
+                    echo blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options
+                    blackfire-player run <<parameters.scenario>> $BF_ENVIRONMENT $BF_ENDPOINT $variable_options
