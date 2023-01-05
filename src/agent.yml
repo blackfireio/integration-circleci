@@ -54,11 +54,11 @@ commands:
                   name: 'Blackfire: Register agent and client'
                   command: |
                       if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-                      $SUDO blackfire-agent -register \
+                      $SUDO blackfire agent:config \
                           --server-id=${<< parameters.server_id >>} \
                           --server-token=${<< parameters.server_token >>}
-                      $SUDO /etc/init.d/blackfire-agent restart
-                      blackfire config \
+                      $SUDO systemctl restart blackfire-agent
+                      blackfire client:config \
                           --client-id=${<< parameters.client_id >>} \
                           --client-token=${<< parameters.client_token >>}
 
@@ -90,12 +90,11 @@ commands:
                   name: 'Blackfire: Install Debian package'
                   command: |
                       if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-                      wget -q -O - https://packages.blackfire.io/gpg.key | $SUDO apt-key add -
-                      echo "deb http://packages.blackfire.io/debian any main" | $SUDO tee /etc/apt/sources.list.d/blackfire.list
+                      wget -q -O - https://packages.blackfire.io/gpg.key | $SUDO dd of=/usr/share/keyrings/blackfire-archive-keyring.asc
+                      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/blackfire-archive-keyring.asc] http://packages.blackfire.io/debian any main" | $SUDO tee /etc/apt/sources.list.d/blackfire.list
                       $SUDO apt update
-                      $SUDO apt-get install blackfire-agent
+                      $SUDO apt-get install blackfire
                       echo ""
-                      blackfire-agent -v
                       blackfire version
 
             - register:
@@ -130,11 +129,9 @@ commands:
                   name: 'Blackfire: Install RedHat package'
                   command: |
                       if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
-                      $SUDO yum install pygpgme
                       wget -O - "http://packages.blackfire.io/fedora/blackfire.repo" | $SUDO tee /etc/yum.repos.d/blackfire.repo
-                      $SUDO yum install blackfire-agent
+                      $SUDO yum install -y blackfire
                       echo "\n"
-                      blackfire-agent -v
                       blackfire version
 
             - register:
@@ -235,7 +232,7 @@ examples:
             jobs:
                 blackfire-agent-example:
                     docker:
-                        - image: circleci/php:7.3-node
+                        - image: circleci/php:8.2-node
                     steps:
                         - checkout
                         - blackfire-agent/setup
@@ -251,7 +248,7 @@ examples:
             jobs:
                 blackfire-build-example:
                     docker:
-                        - image: circleci/php:7.3-node
+                        - image: circleci/php:8.2-node
                     steps:
                         - checkout
                         - blackfire-agent/build-trigger:
